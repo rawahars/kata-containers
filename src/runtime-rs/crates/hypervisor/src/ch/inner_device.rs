@@ -6,6 +6,7 @@
 
 use super::inner::CloudHypervisorInner;
 use crate::ch::utils::get_rootless_symlink_sandbox_jailer_root;
+use crate::device::driver::BlockDeviceFormat;
 use crate::device::pci_path::PciPath;
 use crate::device::DeviceType;
 use crate::utils::create_dir_all_with_inherit_owner;
@@ -523,7 +524,10 @@ impl TryFrom<BlockConfigModern> for DiskConfig {
             num_queues: blkcfg.num_queues,
             queue_size: blkcfg.queue_size as u16,
             sparse: blkcfg.discard_unmap,
-            image_type: ImageType::Raw,
+            image_type: match blkcfg.format {
+                BlockDeviceFormat::Vmdk => ImageType::FlatVmdk,
+                _ => ImageType::Raw,
+            },
             ..Default::default()
         };
 
